@@ -19,8 +19,8 @@ By default, the input vector is random. You change this by modyfying `main.cpp`:
         // in.push_back(i);
         // in.push_back(size - 1 - i);
 ```
-uncomment the first line to push random elements
-uncomment the seconf line to push increasing elements
+uncomment the first line to push random elements<br>
+uncomment the seconf line to push increasing elements<br>
 uncomment the third line to push decreasing elements
 
 Do not forget to recompile each time you modify the source.
