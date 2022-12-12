@@ -83,6 +83,15 @@ int64_t test_sliding_window_minimum_deque_pre_alloc(const std::vector<std::vecto
     return duration_cast<microseconds>(end - start).count();
 }
 
+int64_t test_sliding_window_minimum_deque_rotation(const std::vector<std::vector<int>> vs, uint64_t w) {
+    auto start = high_resolution_clock::now();
+    for (const auto& v : vs) {
+        sliding_window_minimum_deque_rotation(v, w);
+    }
+    auto end = high_resolution_clock::now();
+    return duration_cast<microseconds>(end - start).count();
+}
+
 int main() {
     // int size = 3000;
     int nb_test = 10000;
@@ -101,11 +110,11 @@ int main() {
     // lest's check that every function returns the same result
 
     {
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1; i++) {
             auto [rng0, uni0] = rd(100, 1000);
-            auto size = uni0(rng0);
+            auto size = 20;
             auto [rng1, uni1] = rd(1, size);
-            auto w = uni1(rng1);
+            auto w = 5;
             const auto v = rd_vect(size);
             auto vcopy = v;
 
@@ -116,6 +125,7 @@ int main() {
             auto r4 = sliding_window_minimum_not_in_place_pre_alloc(v, w);
             auto r5 = sliding_window_minimum_deque(v, w);
             auto r6 = sliding_window_minimum_deque_pre_alloc(v, w);
+            auto r7 = sliding_window_minimum_deque_rotation(v, w);
 
             assert(r0 == r1);
             assert(r0 == r2);
@@ -123,6 +133,8 @@ int main() {
             assert(r0 == r4);
             assert(r0 == r5);
             assert(r0 == r6);
+            assert(r0 == r7);
+            exit(0);
         }
     }
 

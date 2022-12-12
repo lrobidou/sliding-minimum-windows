@@ -15,4 +15,5 @@ std::vector<int> sliding_window_minimum_not_in_place(const std::vector<int>& in,
 std::vector<int> sliding_window_minimum_not_in_place_pre_alloc(const std::vector<int>& in, uint64_t window_size);
 std::vector<int> sliding_window_minimum_deque(const std::vector<int>& ARR, uint64_t K);
 std::vector<int> sliding_window_minimum_deque_pre_alloc(const std::vector<int>& ARR, uint64_t K);
+std::vector<int> sliding_window_minimum_deque_rotation(const std::vector<int>& ARR, uint64_t K);
 std::vector<int> sliding_window_minimum(std::vector<int>& in, uint64_t window_size);
