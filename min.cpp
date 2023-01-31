@@ -102,6 +102,32 @@ std::vector<int> sliding_window_minimum_deque_pre_alloc(const std::vector<int>& 
     return res;
 }
 
+std::vector<int> sliding_window_minimum_deque_in_place(std::vector<int>& ARR, uint64_t K) {
+    // using a deque
+    // pair<int, int> represents the pair (ARR[i], i)
+    // the result vector is preallocated
+    // std::vector<int> res;
+    // res.reserve(ARR.size() - K + 1);
+    std::deque<std::pair<int, int>> window;
+    for (int i = 0; i < ARR.size(); i++) {
+        while (!window.empty() && window.back().first >= ARR[i])
+            window.pop_back();
+        window.push_back(std::make_pair(ARR[i], i));
+
+        while (window.front().second + K <= i)
+            window.pop_front();
+
+        if (i >= K - 1) {
+            ARR[i - (K - 1)] = window.front().first;
+        }
+    }
+
+    for (std::size_t i = 0; i < K - 1; i++) {
+        ARR.pop_back();
+    }
+    return ARR;
+}
+
 template <typename T>
 class Rotation {
    private:
@@ -114,21 +140,46 @@ class Rotation {
    public:
     Rotation(int size);
     // template <typename T>
+    T get_front();
+    T get_back();
+    bool empty();
+    // void remove_front();
+
     void push_back(T element);
     void remove_front();
+    void remove_back();
+    void print();
 };
 
 template <typename T>
-Rotation<T>::Rotation(int size) : _size(size), _content(_size, 0), _back(std::nullopt), _front(std::nullopt) {
+Rotation<T>::Rotation(int size) : _size(size + 1), _back(std::nullopt), _front(std::nullopt), _nb(0) {
+    for (std::size_t i = 0; i < this->_size; i++) {
+        this->_content.push_back(std::make_pair(0, 0));
+    }
+}
+
+template <typename T>
+T Rotation<T>::get_front() {
+    return this->_content[this->_front.value()];
+}
+
+template <typename T>
+T Rotation<T>::get_back() {
+    return this->_content[this->_back.value()];
+}
+
+template <typename T>
+bool Rotation<T>::empty() {
+    return (!this->_back.has_value());
 }
 
 template <typename T>
 void Rotation<T>::push_back(T element) {
-    if (this->_nb == element) {
+    if (this->_nb == this->_size) {
         exit(1);
     }
     this->_nb += 1;
-    if (this->_front.has_value()) {
+    if (!this->_front.has_value()) {
         this->_front = 0;
         this->_back = 0;
         this->_content[0] = element;
@@ -158,6 +209,48 @@ void Rotation<T>::remove_front() {
     }
 }
 
+template <typename T>
+void Rotation<T>::remove_back() {
+    if (this->_nb == 0) {
+        exit(1);
+    }
+    this->_nb -= 1;
+    if (this->_nb == 0) {
+        this->_front = std::nullopt;
+        this->_back = std::nullopt;
+    } else {
+        this->_back = this->_back.value() - 1;
+        if (this->_back.value() == -1) {
+            this->_back = this->_size - 1;
+        }
+    }
+}
+
+template <typename T>
+void Rotation<T>::print() {
+    if (this->empty()) {
+        std::cout << "empty" << std::endl;
+        return;
+    }
+    size_t i = this->_back.value();
+    while (true) {
+        std::cout << "(" << this->_content[i].first << ", " << this->_content[i].second << ") ";
+        if (i == this->_front.value()) {
+            break;
+        } else {
+            i--;
+            if (i == -1) {
+                i = this->_size;
+            }
+        }
+        // std::cout << std::endl;
+    }
+    // for (size_t i = 0; i < this->_size; i++) {
+    //     std::cout << this->_content[i] << " ";
+    // }
+    std::cout << std::endl;
+}
+
 // def remove_front(self):
 //     if self.nb ==0:
 //         raise ValueError("nope")
@@ -176,13 +269,8 @@ void Rotation<T>::remove_front() {
 
 std::vector<int> sliding_window_minimum_deque_rotation(const std::vector<int>& ARR, uint64_t K) {
     // using a deque
-    // pair<int, int> represents the pair (ARR[i], i)
-    // the result vector is preallocated
 
-    std::vector<std::pair<int, int>> window_rotation;
-    for (std::size_t i = 0; i < K + 1; i++) {
-        window_rotation.push_back(std::make_pair(0, 0));
-    }
+    Rotation<std::pair<int, int>> window_rotation(K);
 
     std::optional<std::size_t> back = std::nullopt;
     std::optional<std::size_t> front = std::nullopt;
@@ -193,125 +281,71 @@ std::vector<int> sliding_window_minimum_deque_rotation(const std::vector<int>& A
     res.reserve(ARR.size() - K + 1);
     std::deque<std::pair<int, int>> window;
     for (int i = 0; i < ARR.size(); i++) {
+        // window_rotation.print();
         while (!window.empty() && window.back().first >= ARR[i]) {
             window.pop_back();
         }
-        if (back) {
-            while (!(back == front) && window_rotation[back.value()].first >= ARR[i]) {
-                // window_rotation[back].firstpop_back();
-                // back++;
-                // previous_back = back;
-                back = (back.value() - 1);  // % (K + 1);
-                if (back == -1) {
-                    back = K;
-                }
-                std::cout << back.value() << std::endl;
-            }
-        }
 
-        for (auto iter = window.begin(); iter != window.end(); ++iter) {
-            std::cout << "(" << iter->first << ", " << iter->second << ")   ";
+        while (!window_rotation.empty() && window_rotation.get_back().first >= ARR[i]) {
+            window_rotation.remove_back();
         }
-        std::cout << std::endl;
-        for (std::size_t j = 0; j < window_rotation.size(); ++j) {
-            std::cout << "(" << window_rotation[j].first << ", " << window_rotation[j].second << ")";
-            if (j == front) {
-                if (j == back) {
-                    std::cout << "*+ ";
-                } else {
-                    std::cout << "+  ";
-                }
-            } else {
-                if (j == back) {
-                    std::cout << "*  ";
-                } else {
-                    std::cout << "   ";
-                }
-            }
-        }
-        std::cout << std::endl;
-
-        std::cout << std::endl;
 
         window.push_back(std::make_pair(ARR[i], i));
-        if (back) {
-            back = (back.value() + 1) % (K + 1);
-        } else {
-            back = 0;
-        }
-
-        // previous_back = back;
-        window_rotation[back.value()] = std::make_pair(ARR[i], i);
+        window_rotation.push_back(std::make_pair(ARR[i], i));
 
         while (window.front().second + K <= i) {
             window.pop_front();
         }
 
-        if (front) {
-            while (window_rotation[front.value()].second + K <= i) {
-                front = (front.value() + 1) % (K + 1);
-            }
-        } else {
-            std::size_t j = 0;
-            if (window_rotation[front.value()].second + K <= i) {
-                front = (front.value() + 1) % (K + 1);
-            }
-            front = j;
+        while (window_rotation.get_front().second + K <= i) {
+            window_rotation.remove_front();
         }
 
         if (i >= K - 1) {
-            res.push_back(window.front().first);
+            // std::cout << "adding front" << std::endl;
+            res.push_back(window_rotation.get_front().first);
         }
     }
     return res;
 }
 
-// std::vector<int> sliding_window_minimum_deque_rotation(const std::vector<int>& ARR, uint64_t K) {
-//     std::cout << "coucou" << std::endl;
+// std::vector<int> sliding_window_minimum_deque_rotation_in_place(std::vector<int>& ARR, uint64_t K) {
+//     // using a deque
+//     // pair<int, int> represents the pair (ARR[i], i)
+//     // the result vector is preallocated
+
+//     Rotation<std::pair<int, int>> window_rotation(K);
+
+//     std::optional<std::size_t> back = std::nullopt;
+//     std::optional<std::size_t> front = std::nullopt;
+
+//     std::size_t previous_back = 0;
+
 //     std::vector<int> res;
 //     res.reserve(ARR.size() - K + 1);
-
-//     std::vector<std::pair<int, int>> window;
-//     for (std::size_t i = 0; i < K; i++) {
-//         window.push_back(std::make_pair(0, 0));
-//     }
-
-//     std::size_t back = 0;
-//     std::size_t front = 0;
-
-//     for (std::size_t i = 0; i < ARR.size(); i++) {
-//         std::cout << "start loop" << std::endl;
-//         // (back != front) => not empty
-//         std::cout << front << " " << back << std::endl;
-//         while ((back != front) && window[back].first >= ARR[i]) {
-//             // std::cout << "back:" << back << std::endl;
-//             // back = (back % K);
-//             back = (back - 1) % K;
+//     std::deque<std::pair<int, int>> window;
+//     for (int i = 0; i < ARR.size(); i++) {
+//         while (!window.empty() && window.back().first >= ARR[i]) {
+//             window.pop_back();
 //         }
 
-//         std::cout << front << " " << back << std::endl;
-
-//         for (std::size_t i = 0; i < window.size(); i++) {
-//             std::cout << "      " << window[i].first << ":" << window[i].second << std::endl;
+//         while (!window_rotation.empty() && window_rotation.get_back().first >= ARR[i]) {
+//             window_rotation.remove_back();
 //         }
 
-//         window[back] = std::make_pair(ARR[i], i);
-//         back = (back + 1) % K;
+//         window.push_back(std::make_pair(ARR[i], i));
 
-//         std::cout << front << " " << back << std::endl;
-
-//         while (window[front].second + K <= i) {
-//             front = (front + 1) % K;
+//         while (window.front().second + K <= i) {
+//             window.pop_front();
 //         }
 
-//         std::cout << front << " " << back << std::endl;
+//         while (window_rotation.get_front().second + K <= i) {
+//             window_rotation.remove_front();
+//         }
 
 //         if (i >= K - 1) {
-//             res.push_back(window[front].first);
+//             // ARR.push_back(window.front().first);
 //         }
-
-//         std::cout << "end loop" << std::endl
-//                   << std::endl;
 //     }
 //     return res;
 // }

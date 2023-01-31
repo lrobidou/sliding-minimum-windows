@@ -1,6 +1,17 @@
 import json
 import matplotlib.pyplot as plt
 
+def get_marker(strategy):
+    d = {
+        "computing from last min" : "1",
+        "fixed windows" : "2",
+        "fixed windows in place" : "3",
+        "deque" : "4",
+        "deque in place" : ".",
+        "deque rotation" : "+",
+        "recomputing" : "*"
+    }
+    return d[strategy]
 
 def main():
     filenames = [
@@ -10,7 +21,7 @@ def main():
     ]
     dicts = []
     for filename in filenames:
-        with open(filename) as fichier:
+        with open("json/" + filename) as fichier:
             dicts.append(json.load(fichier))
     sizes = sorted([int(x) for x in dicts[0].keys()])
     ws = sorted([int(x) for x in dicts[0][str(sizes[0])].keys()])
@@ -29,10 +40,10 @@ def main():
                 plt.plot(
                     sizes,
                     res[strategy],
-                    "+",
+                    get_marker(strategy),
                     linestyle=loosely_dashed,
                     label=strategy,
-                    markersize=12,
+                    markersize=10,
                     markeredgewidth=4,
                 )
             title = (
@@ -43,7 +54,7 @@ def main():
             plt.legend(loc="best")
             plt.xlabel("size of input vector")
             plt.ylabel("time (seconds), for 10000 instances")
-            plt.savefig(title + ".png")
+            plt.savefig("figs/" + title + ".png")
             plt.clf()
 
 

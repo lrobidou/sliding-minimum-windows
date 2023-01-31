@@ -10,30 +10,10 @@ g++ main.cpp min.cpp -o sliding -O3
 
 Execute the benchmark:
 ```
-./sliding > list_of_random_integers.json
+./sliding
 ```
 
-By default, the input vector is random. You change this by modyfying `main.cpp`:
-```cpp
-        in.push_back(uni(rng));
-        // in.push_back(i);
-        // in.push_back(size - 1 - i);
-```
-uncomment the first line to push random elements<br>
-uncomment the seconf line to push increasing elements<br>
-uncomment the third line to push decreasing elements
-
-Do not forget to recompile each time you modify the source.
-```
-g++ main.cpp min.cpp -o sliding -O3
-./sliding > list_of_random_integers.json
-# modify main.cpp
-g++ main.cpp min.cpp -o sliding -O3
-./sliding > list_of_decreasing_integers.json
-# modify main.cpp
-g++ main.cpp min.cpp -o sliding -O3
-./sliding > list_of_increasing_integers.json
-```
+It will create 3 json files in the json folder. On file contains the benchmark for a random input vector, another one the benchmark for increasing input vector and the last one the benchmark for a decreasing input vector.
 
 Then, plot the graphs:
 ```
@@ -41,3 +21,13 @@ python sliding.py
 ```
 (python 3 is required, as well as matplotlib)
 
+The python script will output its graph in the figs folder.
+
+# Algorithms tested
+- the naive one: recompute each window
+- keeping a reference to the last min value: recompute each windows from the last minimum value only
+- the fixed window approach (not in place), as described in the paper
+- **our proposal**: the fixed window approach in place, as described in the paper
+- deque: a deque-based solution
+- deque in place: the deque approach, but with in place (preventing dynamic memory allocation for the output vector)
+- rotation deque: a deque that reuse the memory of old element to limit memory allocation of the deque itself
