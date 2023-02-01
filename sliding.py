@@ -1,6 +1,13 @@
 import json
 import matplotlib.pyplot as plt
 
+def removesuffix(s: str, suffix: str) -> str:
+    # suffix='' should not call s[:-0].
+    if suffix and s.endswith(suffix):
+        return s[:-len(suffix)]
+    else:
+        return s[:]
+
 def get_marker(strategy):
     d = {
         "computing from last min" : "1",
@@ -47,7 +54,7 @@ def main():
                     markeredgewidth=4,
                 )
             title = (
-                filename.removesuffix(".json").replace("_", " ")
+                removesuffix(filename, ".json").replace("_", " ")
                 + f" (size of window: {w})"
             )
             plt.title(title)

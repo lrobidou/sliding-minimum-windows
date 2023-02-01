@@ -218,7 +218,19 @@ int main() {
     std::ofstream list_of_random_integers("json/list_of_random_integers.json");
     std::ofstream list_of_increasing_integers("json/list_of_increasing_integers.json");
     std::ofstream list_of_decreasing_integers("json/list_of_decreasing_integers.json");
+
+    std::cout << "benchmark for input consisting of vectors of random integers... " << std::flush;
     list_of_random_integers << write_json_string(sizes, window_sizes, nb_test, &rd_vect);
+    std::cout << "done." << std::endl;
+
+    std::cout << "benchmark for input consisting of vectors of increasing integers... " << std::flush;
     list_of_increasing_integers << write_json_string(sizes, window_sizes, nb_test, &inc_vect);
+    std::cout << "done." << std::endl;
+
+    std::cout << "benchmark for input consisting of vectors of decreasing integers... " << std::flush;
     list_of_decreasing_integers << write_json_string(sizes, window_sizes, nb_test, &dec_vect);
+    std::cout << "done." << std::endl;
+
+    std::cout << std::endl;
+    std::cout << "Results are stored in json/*.json files." << std::endl;
 }
