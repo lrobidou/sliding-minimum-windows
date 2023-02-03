@@ -1,11 +1,25 @@
 #include <assert.h>
+#include <sys/stat.h>
 
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
 #include "min.hpp"
+
+inline bool fileExists(const std::string& name) {
+    struct stat buffer;
+    return (stat(name.c_str(), &buffer) == 0);
+}
+
+inline void ensureExists(const std::string& filename) {
+    if (!fileExists(filename)) {
+        std::filesystem::create_directories("json");
+    }
+}
+
 std::vector<int> rd_vect(int size) {
     std::vector<int> in;
     in.reserve(size);
@@ -146,13 +160,13 @@ std::string write_json_string(const std::vector<int>& sizes, const std::vector<u
                 vector_tests.push_back(func(size));
             }
 
-            s += "            \"recomputing\": " + std::to_string(test_sliding_window_minimum_naive(vector_tests, w) / 1000) + ",\n";
-            s += "            \"computing from last min\": " + std::to_string(test_sliding_window_minimum_keep_last_min(vector_tests, w) / 1000) + ",\n";
-            s += "            \"fixed windows\": " + std::to_string(test_sliding_window_minimum_not_in_place(vector_tests, w) / 1000) + ",\n";
-            s += "            \"fixed windows in place\": " + std::to_string(test_sliding_window_minimum(vector_tests, w) / 1000) + ",\n";
-            s += "            \"deque\": " + std::to_string(test_sliding_window_minimum_deque(vector_tests, w) / 1000) + ",\n";
-            s += "            \"deque in place\": " + std::to_string(test_sliding_window_minimum_deque_in_place(vector_tests, w) / 1000) + ",\n";
-            s += "            \"deque rotation\": " + std::to_string(test_sliding_window_minimum_deque_rotation(vector_tests, w) / 1000) + "\n";
+            s += "            \"recomputing\": " + std::to_string(test_sliding_window_minimum_naive(vector_tests, w)) + ",\n";
+            s += "            \"computing from last min\": " + std::to_string(test_sliding_window_minimum_keep_last_min(vector_tests, w)) + ",\n";
+            s += "            \"fixed windows\": " + std::to_string(test_sliding_window_minimum_not_in_place(vector_tests, w)) + ",\n";
+            s += "            \"fixed windows in place\": " + std::to_string(test_sliding_window_minimum(vector_tests, w)) + ",\n";
+            s += "            \"deque\": " + std::to_string(test_sliding_window_minimum_deque(vector_tests, w)) + ",\n";
+            s += "            \"deque in place\": " + std::to_string(test_sliding_window_minimum_deque_in_place(vector_tests, w)) + ",\n";
+            s += "            \"deque rotation\": " + std::to_string(test_sliding_window_minimum_deque_rotation(vector_tests, w)) + "\n";
             if (w == window_sizes[window_sizes.size() - 1]) {
                 s += "        }\n";
             } else {
@@ -207,6 +221,8 @@ int main() {
     // checks that all algorithms give the same result
     check_equality_solution();
 
+    ensureExists("json");
+
     // number of repetition per experiment
     // one experiment being a test for a specific fixed window size and input vector
     int nb_test = 10000;
@@ -215,9 +231,9 @@ int main() {
     // sizes of input vector
     std::vector<int> sizes = {100, 150, 200, 250, 300, 350, 400, 450};  //, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000};
 
-    std::ofstream list_of_random_integers("json/list_of_random_integers.json");
-    std::ofstream list_of_increasing_integers("json/list_of_increasing_integers.json");
-    std::ofstream list_of_decreasing_integers("json/list_of_decreasing_integers.json");
+    std::ofstream list_of_random_integers("json/benchmark_input_is_vectors_of_random_integers.json");
+    std::ofstream list_of_increasing_integers("json/benchmark_input_is_vectors_of_increasing_integers.json");
+    std::ofstream list_of_decreasing_integers("json/benchmark_input_is_vectors_of_decreasing_integers.json");
 
     std::cout << "benchmark for input consisting of vectors of random integers... " << std::flush;
     list_of_random_integers << write_json_string(sizes, window_sizes, nb_test, &rd_vect);
